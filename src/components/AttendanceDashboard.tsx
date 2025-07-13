@@ -1,6 +1,16 @@
-import { CalendarDays, Users, Clock, TrendingUp } from "lucide-react";
+import { useState } from "react";
+import { CalendarDays, Users, Clock, TrendingUp, Calendar } from "lucide-react";
+import { format } from "date-fns";
 import { AttendanceRow } from "./AttendanceRow";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 // Sample data - in a real app this would come from an API
 const attendanceData = [
@@ -141,6 +151,8 @@ const attendanceData = [
 ];
 
 export const AttendanceDashboard = () => {
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date(2025, 6, 14)); // July 14, 2025
+  
   const totalEmployees = attendanceData.length;
   const onTimeEmployees = attendanceData.filter(emp => emp.status === "on-time").length;
   const averageDuration = "8h 13m";
@@ -152,17 +164,47 @@ export const AttendanceDashboard = () => {
       <header className="bg-gradient-to-r from-secondary to-secondary/80 border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">
-                Employee Attendance Dashboard
-              </h1>
-              <p className="mt-2 text-muted-foreground">
-                Track and manage employee attendance with detailed insights
-              </p>
+            <div className="flex items-center gap-6">
+              {/* Date Picker in top left */}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-[240px] justify-start text-left font-normal bg-card hover:bg-muted border-border",
+                      !selectedDate && "text-muted-foreground"
+                    )}
+                  >
+                    <Calendar className="mr-2 h-4 w-4" />
+                    {selectedDate ? format(selectedDate, "PPPP") : <span>Pick a date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <CalendarComponent
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={(date) => date && setSelectedDate(date)}
+                    initialFocus
+                    className="pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+              
+              <div>
+                <h1 className="text-3xl font-bold text-foreground">
+                  Employee Attendance Dashboard
+                </h1>
+                <p className="mt-2 text-muted-foreground">
+                  Track and manage employee attendance with detailed insights
+                </p>
+              </div>
             </div>
-            <div className="hidden md:flex items-center gap-2 text-muted-foreground">
+            
+            <div className="hidden lg:flex items-center gap-2 text-muted-foreground">
               <CalendarDays className="w-5 h-5" />
-              <span className="text-sm font-medium">July 14, 2025</span>
+              <span className="text-sm font-medium">
+                {format(selectedDate, "EEEE, MMMM d, yyyy")}
+              </span>
             </div>
           </div>
         </div>
